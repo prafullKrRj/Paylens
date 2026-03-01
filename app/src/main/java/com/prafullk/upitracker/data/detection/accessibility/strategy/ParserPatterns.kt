@@ -6,9 +6,13 @@ package com.prafullk.upitracker.data.detection.accessibility.strategy
 object ParserPatterns {
 
     /** Handles: ₹500, ₹1,500, ₹1,500.00, Rs. 500, Rs 500.00, INR 500,
-     *           500.00 ₹ (amount before symbol), ₹ 5,00,000 (Indian lakh) */
+     *           500.00 ₹ (amount before symbol), ₹ 5,00,000 (Indian lakh),
+     *           ₹ 1,000,000 (international format) */
     val amountRegex = Regex(
-            """(?:(?:[₹]|Rs\.?|INR)\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)|(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)\s*[₹])""",
+            // Indian lakh format: 1,00,000 (first group 1-3 digits, then groups of 2)
+            // International format: 1,000,000 (groups of 3)
+            """(?:(?:[₹]|Rs\.?|INR)\s*((?:\d{1,3}(?:,\d{3})+|\d{1,3}(?:,\d{2})+|\d+)(?:\.\d{1,2})?)|""" +
+            """((?:\d{1,3}(?:,\d{3})+|\d{1,3}(?:,\d{2})+|\d+)(?:\.\d{1,2})?)\s*[₹])""",
             RegexOption.IGNORE_CASE
     )
 

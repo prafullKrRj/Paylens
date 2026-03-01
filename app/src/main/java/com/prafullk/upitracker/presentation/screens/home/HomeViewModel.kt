@@ -53,8 +53,8 @@ class HomeViewModel(
                         cal.set(Calendar.MILLISECOND, 0)
                         val startOfDay = cal.timeInMillis
 
-                        // Start of this week (Monday)
-                        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+                        // Start of this week (Monday in most locales)
+                        cal.set(Calendar.DAY_OF_WEEK, cal.firstDayOfWeek)
                         val startOfWeek = cal.timeInMillis
 
                         // Start of this month

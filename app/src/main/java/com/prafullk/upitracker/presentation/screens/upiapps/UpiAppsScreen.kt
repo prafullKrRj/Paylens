@@ -188,7 +188,7 @@ fun UpiAppCard(app: UpiAppUiItem, onToggle: (Boolean) -> Unit) {
                         contentAlignment = Alignment.Center
                 ) {
                     Text(
-                            text = app.displayName.first().uppercaseChar().toString(),
+                            text = app.displayName.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
