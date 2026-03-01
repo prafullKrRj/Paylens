@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
 
                 if (isOnboardingCompleted != null) {
                     val startDest =
-                            if (isOnboardingCompleted == true) Route.Home.path
+                            if (isOnboardingCompleted == true) Route.PermissionGate.path
                             else Route.Onboarding.path
                     val navController = rememberNavController()
 

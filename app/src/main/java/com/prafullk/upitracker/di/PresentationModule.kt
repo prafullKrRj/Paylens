@@ -17,7 +17,7 @@ import org.koin.dsl.module
 
 val presentationModule = module {
     viewModel { OnboardingViewModel(get(), get()) }
-    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get()) }
     viewModel { TransactionViewModel(get(), get()) }
     viewModel { (transactionId: String) ->
         TransactionDetailViewModel(transactionId, get(), get(), get())
@@ -27,7 +27,7 @@ val presentationModule = module {
     viewModel { GroupViewModel(get(), get()) }
     viewModel { (groupId: String) -> GroupDetailViewModel(groupId, get(), get()) }
     viewModel { AnalyticsViewModel(get()) }
-    viewModel { SettingsViewModel(get()) }
+    viewModel { SettingsViewModel(get(), get()) }
     viewModel { ClassifyViewModel(get(), get(), get(), get()) }
     viewModel { UpiAppsViewModel(get(), get()) }
 }
