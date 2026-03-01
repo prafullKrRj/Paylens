@@ -31,6 +31,7 @@ import com.prafullk.upitracker.presentation.screens.home.HomeScreen
 import com.prafullk.upitracker.presentation.screens.settings.SettingsScreen
 import com.prafullk.upitracker.presentation.screens.transactions.TransactionDetailScreen
 import com.prafullk.upitracker.presentation.screens.transactions.TransactionListScreen
+import com.prafullk.upitracker.presentation.screens.upiapps.UpiAppsScreen
 
 data class BottomNavItem(val route: Route, val icon: ImageVector, val label: String)
 
@@ -163,10 +164,16 @@ fun PayLensNavGraph(
             }
             composable(Route.Analytics.path) { AnalyticsScreen() }
             composable(Route.Settings.path) {
-                SettingsScreen(onNavigateBack = { navController.navigateUp() })
+                SettingsScreen(
+                        onNavigateBack = { navController.navigateUp() },
+                        onNavigateToUpiApps = { navController.navigate(Route.UpiApps.path) }
+                )
             }
             composable(Route.Classify.path) {
                 ClassifyScreen(onNavigateBack = { navController.navigateUp() })
+            }
+            composable(Route.UpiApps.path) {
+                UpiAppsScreen(onNavigateBack = { navController.navigateUp() })
             }
         }
     }

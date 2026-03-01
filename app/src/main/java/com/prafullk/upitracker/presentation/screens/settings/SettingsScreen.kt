@@ -28,13 +28,22 @@ import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onNavigateBack: () -> Unit, viewModel: SettingsViewModel = koinViewModel()) {
+fun SettingsScreen(
+        onNavigateBack: () -> Unit,
+        onNavigateToUpiApps: () -> Unit = {},
+        viewModel: SettingsViewModel = koinViewModel()
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(topBar = { TopAppBar(title = { Text("Settings") }) }) { padding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
             item {
                 SectionTitle("Detection")
+                SettingsRow(
+                        title = "Tracked UPI Apps",
+                        subtitle = "Manage which apps PayLens monitors",
+                        onClick = onNavigateToUpiApps
+                )
                 SettingsRow(
                         title = "Detection Services",
                         subtitle = "Accessibility & Notifications",

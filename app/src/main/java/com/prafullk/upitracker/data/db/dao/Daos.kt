@@ -103,3 +103,22 @@ interface AccessibilityLogDao {
     @Query("DELETE FROM accessibility_log WHERE capturedAt < :cutoff")
     suspend fun deleteOlderThan(cutoff: Long)
 }
+
+@Dao
+interface UpiAppDao {
+    @Query("SELECT * FROM upi_apps ORDER BY displayName ASC")
+    fun observeAll(): Flow<List<UpiAppEntity>>
+
+    @Query("SELECT * FROM upi_apps WHERE isActive = 1")
+    suspend fun getActivePackageNames(): List<UpiAppEntity>
+
+    @Upsert suspend fun upsert(app: UpiAppEntity)
+
+    @Upsert suspend fun upsertAll(apps: List<UpiAppEntity>)
+
+    @Query("UPDATE upi_apps SET isActive = :isActive WHERE packageName = :packageName")
+    suspend fun setActive(packageName: String, isActive: Boolean)
+
+    @Query("UPDATE upi_apps SET lastTransactionAt = :ts WHERE packageName = :packageName")
+    suspend fun updateLastTransaction(packageName: String, ts: Long)
+}

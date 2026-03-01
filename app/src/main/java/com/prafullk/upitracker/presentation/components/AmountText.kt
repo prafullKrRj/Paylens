@@ -4,10 +4,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.prafullk.upitracker.domain.model.TransactionDirection
+import com.prafullk.upitracker.ui.theme.CreditGreen
+import com.prafullk.upitracker.ui.theme.DebitRed
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
@@ -26,8 +27,8 @@ fun AmountText(
 
     val color =
             when (direction) {
-                TransactionDirection.DEBIT -> Color(0xFFE53935) // Red 600
-                TransactionDirection.CREDIT -> Color(0xFF43A047) // Green 600
+                TransactionDirection.DEBIT -> DebitRed
+                TransactionDirection.CREDIT -> CreditGreen
                 else -> MaterialTheme.colorScheme.onSurface
             }
 
@@ -46,3 +47,4 @@ fun AmountText(
             modifier = modifier
     )
 }
+

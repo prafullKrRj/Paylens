@@ -1,6 +1,11 @@
 package com.prafullk.upitracker.presentation.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -15,6 +21,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -22,12 +29,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.prafullk.upitracker.presentation.components.AmountText
 import com.prafullk.upitracker.presentation.components.EmptyState
 import com.prafullk.upitracker.presentation.components.TransactionCard
+import com.prafullk.upitracker.ui.theme.AmountGold
+import com.prafullk.upitracker.ui.theme.Indigo400
+import com.prafullk.upitracker.ui.theme.Violet400
+import java.text.NumberFormat
+import java.util.Currency
+import java.util.Locale
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -42,9 +57,11 @@ fun HomeScreen(
         LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-                BudgetCard(
+                GradientSummaryCard(
                         monthlyTotal = uiState.monthlyTotal,
-                        monthlyBudget = uiState.monthlyBudget
+                        monthlyBudget = uiState.monthlyBudget,
+                        todayTotal = uiState.todayTotal,
+                        weekTotal = uiState.weekTotal
                 )
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -59,11 +76,16 @@ fun HomeScreen(
 
             if (uiState.recentTransactions.isEmpty()) {
                 item {
-                    EmptyState(
-                            message =
-                                    "No transactions detected yet.\nMake a UPI payment to see it here.",
-                            modifier = Modifier.height(200.dp)
-                    )
+                    AnimatedVisibility(
+                            visible = true,
+                            enter = expandVertically() + fadeIn()
+                    ) {
+                        EmptyState(
+                                message =
+                                        "No transactions detected yet.\nMake a UPI payment to see it here.",
+                                modifier = Modifier.height(200.dp)
+                        )
+                    }
                 }
             } else {
                 items(
@@ -73,9 +95,9 @@ fun HomeScreen(
                     val tx = uiState.recentTransactions[index]
                     TransactionCard(
                             transaction = tx,
-                            entityName = tx.contactName, // Would come from joined data in real app
+                            entityName = tx.contactName,
                             entityColor = null,
-                            groupName = null, // Would come from joined data in real app
+                            groupName = null,
                             groupColor = null,
                             onClick = { onNavigateToTransactionDetail(tx.id) }
                     )
@@ -104,44 +126,105 @@ fun HomeScreen(
 }
 
 @Composable
-fun BudgetCard(monthlyTotal: Double, monthlyBudget: Double?) {
-    Card(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            colors =
-                    CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
+fun GradientSummaryCard(
+        monthlyTotal: Double,
+        monthlyBudget: Double?,
+        todayTotal: Double,
+        weekTotal: Double
+) {
+    val gradientBrush = Brush.linearGradient(
+            colors = listOf(Indigo400, Violet400)
+    )
+    val format = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    format.currency = Currency.getInstance("INR")
+
+    Box(
+            modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(gradientBrush)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
             Text(
                     text = "This Month",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.White.copy(alpha = 0.75f)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            AmountText(
-                    amount = monthlyTotal,
-                    direction = "DEBIT",
-                    style = MaterialTheme.typography.headlineLarge
+            Text(
+                    text = format.format(monthlyTotal),
+                    style = MaterialTheme.typography.displayLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
             )
 
-            if (monthlyBudget != null) {
+            if (monthlyBudget != null && monthlyBudget > 0) {
                 Spacer(modifier = Modifier.height(16.dp))
                 val progress = (monthlyTotal / monthlyBudget).coerceIn(0.0, 1.0).toFloat()
                 LinearProgressIndicator(
                         progress = { progress },
-                        modifier =
-                                Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
+                        color = AmountGold,
+                        trackColor = Color.White.copy(alpha = 0.25f)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                        text = "${(progress * 100).toInt()}% of budget",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(
+                            text = "${(progress * 100).toInt()}% of ₹${monthlyBudget.toInt()} budget",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.8f)
+                    )
+                    if (progress >= 0.9f) {
+                        Text(
+                                text = "⚠ Near limit",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = AmountGold
+                        )
+                    }
+                }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Quick stat pills
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                QuickStatPill(label = "Today", amount = todayTotal, modifier = Modifier.weight(1f))
+                QuickStatPill(label = "This Week", amount = weekTotal, modifier = Modifier.weight(1f))
+                val avgPerDay = if (monthlyTotal > 0) monthlyTotal / 30 else 0.0
+                QuickStatPill(label = "Avg/day", amount = avgPerDay, modifier = Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+fun QuickStatPill(label: String, amount: Double, modifier: Modifier = Modifier) {
+    val format = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    format.currency = Currency.getInstance("INR")
+    format.maximumFractionDigits = 0
+
+    Surface(
+            modifier = modifier,
+            shape = RoundedCornerShape(12.dp),
+            color = Color.White.copy(alpha = 0.15f)
+    ) {
+        Column(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.7f)
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                    text = format.format(amount),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
+            )
         }
     }
 }
@@ -171,6 +254,15 @@ fun TopSpendRow(group: GroupSpending) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
     ) {
+        // Group color strip
+        Box(
+                modifier = Modifier
+                        .width(4.dp)
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color(group.groupColor))
+        )
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
                 text = group.groupName,
                 style = MaterialTheme.typography.bodyLarge,
@@ -183,3 +275,4 @@ fun TopSpendRow(group: GroupSpending) {
         )
     }
 }
+

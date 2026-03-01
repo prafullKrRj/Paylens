@@ -5,12 +5,14 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.prafullk.upitracker.data.db.DatabaseSeeder
 import com.prafullk.upitracker.data.db.PayLensDatabase
+import com.prafullk.upitracker.data.detection.upi.UpiAppDiscoveryService
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val appModule = module {
     single {
         Room.databaseBuilder(androidContext(), PayLensDatabase::class.java, "paylens.db")
+                .fallbackToDestructiveMigration()
                 .addCallback(
                         object : RoomDatabase.Callback() {
                             override fun onCreate(db: SupportSQLiteDatabase) {
@@ -33,6 +35,8 @@ val appModule = module {
     single { get<PayLensDatabase>().groupDao() }
     single { get<PayLensDatabase>().accessibilityLogDao() }
     single { get<PayLensDatabase>().smsLogDao() }
+    single { get<PayLensDatabase>().upiAppDao() }
 
-    // DataStore will be provided later
+    single { UpiAppDiscoveryService(androidContext(), get()) }
 }
+
