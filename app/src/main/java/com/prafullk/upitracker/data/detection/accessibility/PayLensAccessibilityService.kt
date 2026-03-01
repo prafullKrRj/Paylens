@@ -80,9 +80,10 @@ class PayLensAccessibilityService : AccessibilityService() {
                         val screenType = screenIdentityClassifier.classify(allText, pkg, hasIntent)
                         screenStateTracker.recordStateChange(pkg, screenType)
 
-                        if (screenType == ScreenType.PAYMENT_SUCCESS) {
+                        if (screenType == ScreenType.PAYMENT_SUCCESS && screenStateTracker.canLogTransaction()) {
                             parser.extractTransaction(root, pkg, hasIntent)?.let { raw ->
                                 logTransaction(raw)
+                                screenStateTracker.consumeIntent()
                                 discoveryService.recordTransaction(pkg)
                             }
                         }
@@ -93,12 +94,14 @@ class PayLensAccessibilityService : AccessibilityService() {
             }
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
                 if (!screenStateTracker.isCurrentScreenRelevant(pkg)) return
+                if (!screenStateTracker.canLogTransaction()) return
                 val root = rootInActiveWindow ?: return
                 scope.launch(Dispatchers.Default) {
                     try {
                         val hasIntent = screenStateTracker.hasRecentPaymentIntent()
                         parser.extractTransaction(root, pkg, hasIntent)?.let { raw ->
                             logTransaction(raw)
+                            screenStateTracker.consumeIntent()
                             discoveryService.recordTransaction(pkg)
                         }
                     } finally {
