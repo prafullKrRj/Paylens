@@ -20,4 +20,5 @@ sealed class Route(val path: String) {
     object Classify : Route("classify")
     object AddEntity : Route("add_entity?transactionId={transactionId}")
     object UpiApps : Route("upi_apps")
+    object PermissionGate : Route("permission_gate")
 }

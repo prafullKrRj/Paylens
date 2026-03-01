@@ -2,6 +2,7 @@ package com.prafullk.upitracker.presentation.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.prafullk.upitracker.data.preferences.AppPreferences
 import com.prafullk.upitracker.domain.model.Transaction
 import com.prafullk.upitracker.domain.usecase.group.ObserveGroupsUseCase
 import com.prafullk.upitracker.domain.usecase.transaction.GetSpendingAnalyticsUseCase
@@ -33,16 +34,19 @@ data class GroupSpending(
 class HomeViewModel(
         private val observeTransactions: ObserveTransactionsUseCase,
         private val observeGroups: ObserveGroupsUseCase,
-        private val analyticsUseCase: GetSpendingAnalyticsUseCase
+        private val analyticsUseCase: GetSpendingAnalyticsUseCase,
+        private val appPreferences: AppPreferences
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
 
     val uiState: StateFlow<HomeUiState> =
-            combine(observeTransactions(), observeGroups(), _isLoading) {
-                            transactions,
-                            groups,
-                            currentLoading ->
+            combine(
+                            observeTransactions(),
+                            observeGroups(),
+                            _isLoading,
+                            appPreferences.monthlyBudget
+                    ) { transactions, groups, currentLoading, budget ->
                         val now = System.currentTimeMillis()
                         val cal = Calendar.getInstance()
 
@@ -86,7 +90,7 @@ class HomeViewModel(
 
                         HomeUiState(
                                 monthlyTotal = total,
-                                monthlyBudget = 15000.0, // Stub: pull from DataStore later
+                                monthlyBudget = budget,
                                 todayTotal = todayTotal,
                                 weekTotal = weekTotal,
                                 recentTransactions = recent,
@@ -100,4 +104,3 @@ class HomeViewModel(
                             initialValue = HomeUiState()
                     )
 }
-

@@ -3,6 +3,7 @@ package com.prafullk.upitracker.presentation.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Home
@@ -28,6 +29,7 @@ import com.prafullk.upitracker.presentation.screens.entities.EntityListScreen
 import com.prafullk.upitracker.presentation.screens.groups.GroupDetailScreen
 import com.prafullk.upitracker.presentation.screens.groups.GroupListScreen
 import com.prafullk.upitracker.presentation.screens.home.HomeScreen
+import com.prafullk.upitracker.presentation.screens.permissiongate.PermissionGateScreen
 import com.prafullk.upitracker.presentation.screens.settings.SettingsScreen
 import com.prafullk.upitracker.presentation.screens.transactions.TransactionDetailScreen
 import com.prafullk.upitracker.presentation.screens.transactions.TransactionListScreen
@@ -40,11 +42,8 @@ val bottomNavItems =
                 BottomNavItem(Route.Home, Icons.Default.Home, "Home"),
                 BottomNavItem(Route.Transactions, Icons.Default.CreditCard, "Transactions"),
                 BottomNavItem(Route.Entities, Icons.Default.Group, "People"),
-                BottomNavItem(
-                        Route.Groups,
-                        Icons.Default.BarChart,
-                        "Groups"
-                ) // using Groups as alternative to Analytics for now
+                BottomNavItem(Route.Groups, Icons.Default.Category, "Groups"),
+                BottomNavItem(Route.Analytics, Icons.Default.BarChart, "Analytics"),
         )
 
 @Composable
@@ -100,6 +99,15 @@ fun PayLensNavGraph(
                         }
                 )
             }
+            composable(Route.PermissionGate.path) {
+                PermissionGateScreen(
+                        onAllGranted = {
+                            navController.navigate(Route.Home.path) {
+                                popUpTo(Route.PermissionGate.path) { inclusive = true }
+                            }
+                        }
+                )
+            }
             composable(Route.Home.path) {
                 HomeScreen(
                         onNavigateToAllTransactions = {
@@ -107,7 +115,8 @@ fun PayLensNavGraph(
                         },
                         onNavigateToTransactionDetail = { id ->
                             navController.navigate(Route.TransactionDetail.create(id))
-                        }
+                        },
+                        onNavigateToSettings = { navController.navigate(Route.Settings.path) }
                 )
             }
             composable(Route.Transactions.path) {

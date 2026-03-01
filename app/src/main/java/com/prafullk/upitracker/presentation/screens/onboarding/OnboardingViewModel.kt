@@ -1,5 +1,7 @@
 package com.prafullk.upitracker.presentation.screens.onboarding
 
+import android.content.Context
+import android.provider.Settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prafullk.upitracker.data.detection.upi.DiscoveredUpiApp
@@ -32,6 +34,16 @@ class OnboardingViewModel(
                     started = SharingStarted.WhileSubscribed(5000),
                     initialValue = OnboardingUiState()
             )
+
+    fun checkAccessibilityStatus(context: Context) {
+        val enabledServices =
+                Settings.Secure.getString(
+                        context.contentResolver,
+                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+                ) ?: ""
+        val isEnabled = enabledServices.contains(context.packageName, ignoreCase = true)
+        _uiState.value = _uiState.value.copy(accessibilityEnabled = isEnabled)
+    }
 
     fun scanForApps() {
         viewModelScope.launch {
