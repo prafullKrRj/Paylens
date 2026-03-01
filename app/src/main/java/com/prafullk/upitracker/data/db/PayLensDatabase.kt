@@ -7,11 +7,13 @@ import com.prafullk.upitracker.data.db.dao.GroupDao
 import com.prafullk.upitracker.data.db.dao.SmsLogDao
 import com.prafullk.upitracker.data.db.dao.TrackedEntityDao
 import com.prafullk.upitracker.data.db.dao.TransactionDao
+import com.prafullk.upitracker.data.db.dao.UpiAppDao
 import com.prafullk.upitracker.data.db.entities.AccessibilityLogEntity
 import com.prafullk.upitracker.data.db.entities.GroupEntity
 import com.prafullk.upitracker.data.db.entities.SmsLogEntity
 import com.prafullk.upitracker.data.db.entities.TrackedEntityEntity
 import com.prafullk.upitracker.data.db.entities.TransactionEntity
+import com.prafullk.upitracker.data.db.entities.UpiAppEntity
 
 @Database(
         entities =
@@ -20,8 +22,9 @@ import com.prafullk.upitracker.data.db.entities.TransactionEntity
                         TrackedEntityEntity::class,
                         GroupEntity::class,
                         SmsLogEntity::class,
-                        AccessibilityLogEntity::class],
-        version = 1,
+                        AccessibilityLogEntity::class,
+                        UpiAppEntity::class],
+        version = 2,
         exportSchema = false
 )
 abstract class PayLensDatabase : RoomDatabase() {
@@ -30,4 +33,6 @@ abstract class PayLensDatabase : RoomDatabase() {
     abstract fun groupDao(): GroupDao
     abstract fun smsLogDao(): SmsLogDao
     abstract fun accessibilityLogDao(): AccessibilityLogDao
+    abstract fun upiAppDao(): UpiAppDao
 }
+

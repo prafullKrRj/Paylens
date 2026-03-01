@@ -11,11 +11,12 @@ import com.prafullk.upitracker.presentation.screens.onboarding.OnboardingViewMod
 import com.prafullk.upitracker.presentation.screens.settings.SettingsViewModel
 import com.prafullk.upitracker.presentation.screens.transactions.TransactionDetailViewModel
 import com.prafullk.upitracker.presentation.screens.transactions.TransactionViewModel
+import com.prafullk.upitracker.presentation.screens.upiapps.UpiAppsViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val presentationModule = module {
-    viewModel { OnboardingViewModel() }
+    viewModel { OnboardingViewModel(get()) }
     viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { TransactionViewModel(get(), get()) }
     viewModel { (transactionId: String) ->
@@ -28,4 +29,6 @@ val presentationModule = module {
     viewModel { AnalyticsViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { ClassifyViewModel(get(), get(), get(), get()) }
+    viewModel { UpiAppsViewModel(get(), get()) }
 }
+

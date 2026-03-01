@@ -62,3 +62,12 @@ data class AccessibilityLogEntity(
         val capturedAt: Long,
         val transactionId: String?
 )
+
+@Entity(tableName = "upi_apps")
+data class UpiAppEntity(
+        @PrimaryKey val packageName: String,
+        val displayName: String,
+        val isActive: Boolean = true,
+        val discoveredAt: Long = System.currentTimeMillis(),
+        val lastTransactionAt: Long? = null
+)
