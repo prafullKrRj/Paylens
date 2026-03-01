@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prafullk.upitracker.data.detection.upi.DiscoveredUpiApp
 import com.prafullk.upitracker.data.detection.upi.UpiAppDiscoveryService
+import com.prafullk.upitracker.data.preferences.AppPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +20,8 @@ data class OnboardingUiState(
 )
 
 class OnboardingViewModel(
-        private val discoveryService: UpiAppDiscoveryService
+        private val discoveryService: UpiAppDiscoveryService,
+        private val appPreferences: AppPreferences
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -40,7 +42,6 @@ class OnboardingViewModel(
     }
 
     fun completeOnboarding() {
-        // Here we would use DataStore to save the onboarding flag
+        viewModelScope.launch { appPreferences.saveOnboardingCompleted(true) }
     }
 }
-

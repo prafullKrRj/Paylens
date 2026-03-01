@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,34 +39,32 @@ fun GroupListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold { padding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        item {
+            Text(
+                    text = "Categories",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(16.dp)
+            )
+        }
+
+        items(uiState.topGroups, key = { it.group.id }) { item ->
+            GroupCard(item, onClick = { onNavigateToGroupDetail(item.group.id) })
+        }
+
+        if (uiState.otherGroups.isNotEmpty()) {
             item {
                 Text(
-                        text = "Categories",
-                        style = MaterialTheme.typography.titleLarge,
+                        text = "Other Categories",
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(16.dp)
                 )
             }
 
-            items(uiState.topGroups, key = { it.group.id }) { item ->
+            items(uiState.otherGroups, key = { it.group.id }) { item ->
                 GroupCard(item, onClick = { onNavigateToGroupDetail(item.group.id) })
-            }
-
-            if (uiState.otherGroups.isNotEmpty()) {
-                item {
-                    Text(
-                            text = "Other Categories",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(16.dp)
-                    )
-                }
-
-                items(uiState.otherGroups, key = { it.group.id }) { item ->
-                    GroupCard(item, onClick = { onNavigateToGroupDetail(item.group.id) })
-                }
             }
         }
     }
@@ -75,18 +72,19 @@ fun GroupListScreen(
 
 @Composable
 fun GroupCard(item: GroupWithSpending, onClick: () -> Unit) {
-    val ratio = if (item.budget != null && item.budget > 0.0) {
-        (item.currentSpend / item.budget).toFloat().coerceIn(0f, 1f)
-    } else 0f
+    val ratio =
+            if (item.budget != null && item.budget > 0.0) {
+                (item.currentSpend / item.budget).toFloat().coerceIn(0f, 1f)
+            } else 0f
 
     val groupColor = Color(item.group.color)
     val isOverBudget = ratio >= 1f
 
     Card(
-            modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp)
-                    .clickable(onClick = onClick),
+            modifier =
+                    Modifier.fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                            .clickable(onClick = onClick),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -105,9 +103,7 @@ fun GroupCard(item: GroupWithSpending, onClick: () -> Unit) {
             }
 
             Column(
-                    modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 14.dp)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
                 Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -127,8 +123,9 @@ fun GroupCard(item: GroupWithSpending, onClick: () -> Unit) {
                         Text(
                                 text = "${(ratio * 100).toInt()}% of ₹${item.budget.toInt()}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (isOverBudget) MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.onSurfaceVariant
+                                color =
+                                        if (isOverBudget) MaterialTheme.colorScheme.error
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         if (isOverBudget) {
                             Text(
@@ -144,4 +141,3 @@ fun GroupCard(item: GroupWithSpending, onClick: () -> Unit) {
         }
     }
 }
-

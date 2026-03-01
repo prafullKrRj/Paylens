@@ -38,5 +38,5 @@ val appModule = module {
     single { get<PayLensDatabase>().upiAppDao() }
 
     single { UpiAppDiscoveryService(androidContext(), get()) }
+    single { com.prafullk.upitracker.data.preferences.AppPreferences(androidContext()) }
 }
-

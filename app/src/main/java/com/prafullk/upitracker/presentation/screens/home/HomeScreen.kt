@@ -16,11 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,74 +50,69 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold { padding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                GradientSummaryCard(
-                        monthlyTotal = uiState.monthlyTotal,
-                        monthlyBudget = uiState.monthlyBudget,
-                        todayTotal = uiState.todayTotal,
-                        weekTotal = uiState.weekTotal
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            GradientSummaryCard(
+                    monthlyTotal = uiState.monthlyTotal,
+                    monthlyBudget = uiState.monthlyBudget,
+                    todayTotal = uiState.todayTotal,
+                    weekTotal = uiState.weekTotal
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-            item {
-                SectionTitleRow(
-                        title = "Recent Transactions",
-                        action = "See All",
-                        onActionClick = onNavigateToAllTransactions
-                )
-            }
+        item {
+            SectionTitleRow(
+                    title = "Recent Transactions",
+                    action = "See All",
+                    onActionClick = onNavigateToAllTransactions
+            )
+        }
 
-            if (uiState.recentTransactions.isEmpty()) {
-                item {
-                    AnimatedVisibility(
-                            visible = true,
-                            enter = expandVertically() + fadeIn()
-                    ) {
-                        EmptyState(
-                                message =
-                                        "No transactions detected yet.\nMake a UPI payment to see it here.",
-                                modifier = Modifier.height(200.dp)
-                        )
-                    }
-                }
-            } else {
-                items(
-                        count = uiState.recentTransactions.size,
-                        key = { index -> uiState.recentTransactions[index].id }
-                ) { index ->
-                    val tx = uiState.recentTransactions[index]
-                    TransactionCard(
-                            transaction = tx,
-                            entityName = tx.contactName,
-                            entityColor = null,
-                            groupName = null,
-                            groupColor = null,
-                            onClick = { onNavigateToTransactionDetail(tx.id) }
+        if (uiState.recentTransactions.isEmpty()) {
+            item {
+                AnimatedVisibility(visible = true, enter = expandVertically() + fadeIn()) {
+                    EmptyState(
+                            message =
+                                    "No transactions detected yet.\nMake a UPI payment to see it here.",
+                            modifier = Modifier.height(200.dp)
                     )
                 }
             }
-
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                SectionTitleRow(title = "Top Spends This Month", action = null, onActionClick = {})
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
+        } else {
             items(
-                    count = uiState.topSpendingGroups.size,
-                    key = { index -> uiState.topSpendingGroups[index].groupId }
+                    count = uiState.recentTransactions.size,
+                    key = { index -> uiState.recentTransactions[index].id }
             ) { index ->
-                val group = uiState.topSpendingGroups[index]
-                TopSpendRow(group = group)
+                val tx = uiState.recentTransactions[index]
+                TransactionCard(
+                        transaction = tx,
+                        entityName = tx.contactName,
+                        entityColor = null,
+                        groupName = null,
+                        groupColor = null,
+                        onClick = { onNavigateToTransactionDetail(tx.id) }
+                )
             }
+        }
 
-            item {
-                Spacer(modifier = Modifier.height(32.dp)) // padding for bottom nav
-            }
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
+            SectionTitleRow(title = "Top Spends This Month", action = null, onActionClick = {})
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        items(
+                count = uiState.topSpendingGroups.size,
+                key = { index -> uiState.topSpendingGroups[index].groupId }
+        ) { index ->
+            val group = uiState.topSpendingGroups[index]
+            TopSpendRow(group = group)
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(32.dp)) // padding for bottom nav
         }
     }
 }
@@ -132,18 +124,16 @@ fun GradientSummaryCard(
         todayTotal: Double,
         weekTotal: Double
 ) {
-    val gradientBrush = Brush.linearGradient(
-            colors = listOf(Indigo400, Violet400)
-    )
+    val gradientBrush = Brush.linearGradient(colors = listOf(Indigo400, Violet400))
     val format = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
     format.currency = Currency.getInstance("INR")
 
     Box(
-            modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(gradientBrush)
+            modifier =
+                    Modifier.fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(gradientBrush)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
@@ -164,14 +154,19 @@ fun GradientSummaryCard(
                 val progress = (monthlyTotal / monthlyBudget).coerceIn(0.0, 1.0).toFloat()
                 LinearProgressIndicator(
                         progress = { progress },
-                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
+                        modifier =
+                                Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
                         color = AmountGold,
                         trackColor = Color.White.copy(alpha = 0.25f)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
-                            text = "${(progress * 100).toInt()}% of ₹${monthlyBudget.toInt()} budget",
+                            text =
+                                    "${(progress * 100).toInt()}% of ₹${monthlyBudget.toInt()} budget",
                             style = MaterialTheme.typography.labelMedium,
                             color = Color.White.copy(alpha = 0.8f)
                     )
@@ -188,9 +183,16 @@ fun GradientSummaryCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Quick stat pills
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 QuickStatPill(label = "Today", amount = todayTotal, modifier = Modifier.weight(1f))
-                QuickStatPill(label = "This Week", amount = weekTotal, modifier = Modifier.weight(1f))
+                QuickStatPill(
+                        label = "This Week",
+                        amount = weekTotal,
+                        modifier = Modifier.weight(1f)
+                )
                 val avgPerDay = if (monthlyTotal > 0) monthlyTotal / 30 else 0.0
                 QuickStatPill(label = "Avg/day", amount = avgPerDay, modifier = Modifier.weight(1f))
             }
@@ -256,11 +258,11 @@ fun TopSpendRow(group: GroupSpending) {
     ) {
         // Group color strip
         Box(
-                modifier = Modifier
-                        .width(4.dp)
-                        .height(36.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(Color(group.groupColor))
+                modifier =
+                        Modifier.width(4.dp)
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(Color(group.groupColor))
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
@@ -275,4 +277,3 @@ fun TopSpendRow(group: GroupSpending) {
         )
     }
 }
-

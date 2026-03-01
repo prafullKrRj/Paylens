@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,36 +32,31 @@ fun TransactionListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (uiState.unclassifiedCount > 0) {
-                UnclassifiedBanner(
-                        count = uiState.unclassifiedCount,
-                        onClick = onNavigateToClassify
-                )
-            }
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (uiState.unclassifiedCount > 0) {
+            UnclassifiedBanner(count = uiState.unclassifiedCount, onClick = onNavigateToClassify)
+        }
 
-            if (uiState.transactions.isEmpty()) {
-                EmptyState(message = "No transactions found", modifier = Modifier.weight(1f))
-            } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    items(
-                            count = uiState.transactions.size,
-                            key = { index -> uiState.transactions[index].id }
-                    ) { index ->
-                        val tx = uiState.transactions[index]
-                        TransactionCard(
-                                transaction = tx,
-                                entityName = tx.contactName, // Map domain names properly later
-                                entityColor = null,
-                                groupName = null, // Map domain groups properly later
-                                groupColor = null,
-                                onClick = { onNavigateToTransactionDetail(tx.id) }
-                        )
-                    }
-
-                    item { Spacer(modifier = Modifier.height(32.dp)) }
+        if (uiState.transactions.isEmpty()) {
+            EmptyState(message = "No transactions found", modifier = Modifier.weight(1f))
+        } else {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(
+                        count = uiState.transactions.size,
+                        key = { index -> uiState.transactions[index].id }
+                ) { index ->
+                    val tx = uiState.transactions[index]
+                    TransactionCard(
+                            transaction = tx,
+                            entityName = tx.contactName, // Map domain names properly later
+                            entityColor = null,
+                            groupName = null, // Map domain groups properly later
+                            groupColor = null,
+                            onClick = { onNavigateToTransactionDetail(tx.id) }
+                    )
                 }
+
+                item { Spacer(modifier = Modifier.height(32.dp)) }
             }
         }
     }

@@ -10,6 +10,7 @@ import com.prafullk.upitracker.data.db.entities.GroupEntity
 import com.prafullk.upitracker.data.db.entities.SmsLogEntity
 import com.prafullk.upitracker.data.db.entities.TrackedEntityEntity
 import com.prafullk.upitracker.data.db.entities.TransactionEntity
+import com.prafullk.upitracker.data.db.entities.UpiAppEntity
 import kotlinx.coroutines.flow.Flow
 
 data class GroupSpendingTuple(val groupId: String?, val total: Double)
@@ -81,7 +82,7 @@ interface TrackedEntityDao {
 
 @Dao
 interface GroupDao {
-    @Query("SELECT * FROM groups ORDER BY sortOrder ASC") fun observeAll(): Flow<List<GroupEntity>>
+    @Query("SELECT * FROM `GROUPS` ORDER BY sortOrder ASC") fun observeAll(): Flow<List<GroupEntity>>
 
     @Upsert suspend fun upsert(group: GroupEntity)
 

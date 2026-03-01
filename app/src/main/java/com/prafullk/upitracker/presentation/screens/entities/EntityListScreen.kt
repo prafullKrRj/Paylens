@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,43 +30,41 @@ fun EntityListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            val allEntities = uiState.people + uiState.merchants
+    Column(modifier = Modifier.fillMaxSize()) {
+        val allEntities = uiState.people + uiState.merchants
 
-            if (allEntities.isEmpty()) {
-                EmptyState(
-                        message = "No people or merchants tracked yet",
-                        modifier = Modifier.weight(1f)
-                )
-            } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    if (uiState.people.isNotEmpty()) {
-                        item {
-                            Text(
-                                    "People",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                        items(uiState.people, key = { it.id }) { entity ->
-                            EntityRow(entity, onClick = { onNavigateToEntityDetail(entity.id) })
-                        }
+        if (allEntities.isEmpty()) {
+            EmptyState(
+                    message = "No people or merchants tracked yet",
+                    modifier = Modifier.weight(1f)
+            )
+        } else {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                if (uiState.people.isNotEmpty()) {
+                    item {
+                        Text(
+                                "People",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(16.dp)
+                        )
                     }
+                    items(uiState.people, key = { it.id }) { entity ->
+                        EntityRow(entity, onClick = { onNavigateToEntityDetail(entity.id) })
+                    }
+                }
 
-                    if (uiState.merchants.isNotEmpty()) {
-                        item {
-                            Text(
-                                    "Merchants & Services",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                        items(uiState.merchants, key = { it.id }) { entity ->
-                            EntityRow(entity, onClick = { onNavigateToEntityDetail(entity.id) })
-                        }
+                if (uiState.merchants.isNotEmpty()) {
+                    item {
+                        Text(
+                                "Merchants & Services",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                    items(uiState.merchants, key = { it.id }) { entity ->
+                        EntityRow(entity, onClick = { onNavigateToEntityDetail(entity.id) })
                     }
                 }
             }
