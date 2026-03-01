@@ -20,6 +20,8 @@ class PayLensAccessibilityService : AccessibilityService() {
     private val discoveryService by inject<UpiAppDiscoveryService>()
     private val upiAppDao by inject<UpiAppDao>()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val screenIdentityClassifier = ScreenIdentityClassifier()
+    private val screenStateTracker: ScreenStateTracker by inject()
 
     override fun onServiceConnected() {
         refreshServiceInfo()
@@ -35,35 +37,67 @@ class PayLensAccessibilityService : AccessibilityService() {
     /** Load active package list from DB and update serviceInfo dynamically. */
     fun refreshServiceInfo() {
         scope.launch {
-            val packages = runCatching { discoveryService.loadActivePackageNames() }
-                    .getOrDefault(emptyList())
+            val packages =
+                    runCatching { discoveryService.loadActivePackageNames() }
+                            .getOrDefault(emptyList())
             applyPackageFilter(packages)
         }
     }
 
     private fun applyPackageFilter(packages: List<String>) {
-        val info = AccessibilityServiceInfo().apply {
-            eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or
-                    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-            feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
-            flags = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
-                    AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
-            notificationTimeout = 100
-            packageNames = packages.toTypedArray()
-        }
+        val info =
+                AccessibilityServiceInfo().apply {
+                    eventTypes =
+                            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or
+                                    AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                    feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
+                    flags =
+                            AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
+                                    AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+                    notificationTimeout = 100
+                    packageNames = packages.toTypedArray()
+                }
         serviceInfo = info
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         val pkg = event.packageName?.toString() ?: return
 
+        // Record package/className to detect NPCI overlay presence without reading nodes
+        screenStateTracker.recordPackage(pkg, event.className?.toString())
+
+        if (!AppScreenRules.shouldProcess(event, pkg)) return
+
         when (event.eventType) {
-            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED,
-            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
+            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
                 val root = rootInActiveWindow ?: return
                 scope.launch(Dispatchers.Default) {
                     try {
-                        parser.extractTransaction(root, pkg)?.let { raw ->
+                        val allText = mutableListOf<String>()
+                        parser.collectTextNodes(root, allText)
+
+                        val hasIntent = screenStateTracker.hasRecentPaymentIntent()
+                        val screenType = screenIdentityClassifier.classify(allText, pkg, hasIntent)
+                        screenStateTracker.recordStateChange(pkg, screenType)
+
+                        if (screenType == ScreenType.PAYMENT_SUCCESS) {
+                            parser.extractTransaction(root, pkg, hasIntent)?.let { raw ->
+                                logTransaction(raw)
+                                discoveryService.recordTransaction(pkg)
+                            }
+                        }
+                    } finally {
+                        root.recycle()
+                    }
+                }
+            }
+            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
+                if (!screenStateTracker.isCurrentScreenRelevant(pkg)) return
+                val root = rootInActiveWindow ?: return
+                scope.launch(Dispatchers.Default) {
+                    try {
+                        val hasIntent = screenStateTracker.hasRecentPaymentIntent()
+                        parser.extractTransaction(root, pkg, hasIntent)?.let { raw ->
                             logTransaction(raw)
                             discoveryService.recordTransaction(pkg)
                         }
@@ -77,4 +111,3 @@ class PayLensAccessibilityService : AccessibilityService() {
 
     override fun onInterrupt() {}
 }
-

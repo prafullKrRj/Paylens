@@ -39,4 +39,5 @@ val appModule = module {
 
     single { UpiAppDiscoveryService(androidContext(), get()) }
     single { com.prafullk.upitracker.data.preferences.AppPreferences(androidContext()) }
+    single { com.prafullk.upitracker.data.detection.accessibility.ScreenStateTracker() }
 }
